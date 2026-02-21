@@ -1,14 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BUS FULL-AA</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #4facfe, #00f2fe);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      width: 320px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #searchBtn {
+      background: #ff7b7b;
+      color: white;
+    }
+
+    #scanBtn {
+      background: #4CAF50;
+      color: white;
+    }
+  </style>
+</head>
+
 <body>
+
   <div class="container">
-    <h1 class="title">BUS FULLAA</h1>
+    <h1>🚌 BUS FULL-AA</h1>
 
-    <h2>Bus Passenger Counter</h2>
+    <input type="text" id="start" placeholder="Starting Point" />
+    <input type="text" id="end" placeholder="Ending Point" />
 
-    <p id="count">0</p>
+    <button id="searchBtn">Search Bus</button>
 
-    <button id="enterBtn">Enter Bus</button>
-    <button id="exitBtn">Exit Bus</button>
+    <!-- ✅ Scanner Button -->
+    <button id="scanBtn">Scan QR</button>
   </div>
 
-  <script type="module" src="/src/main.js"></script>
+  <script>
+    // 🔍 Go to details page with query
+    document.getElementById("searchBtn").addEventListener("click", () => {
+
+  const start = document.getElementById("start").value.trim().toUpperCase();
+  const end = document.getElementById("end").value.trim().toUpperCase();
+
+  if (!start || !end) {
+    alert("Please enter both fields");
+    return;
+  }
+
+  window.location.href = `details.html?from=${start}&to=${end}`;
+});
+
+    // 📷 Go to scanner page
+    document.getElementById("scanBtn").addEventListener("click", () => {
+      window.location.href = "scanner.html";
+    });
+  </script>
+
 </body>
+</html>

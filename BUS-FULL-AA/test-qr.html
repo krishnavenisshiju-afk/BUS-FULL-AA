@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Test QR Code Generator</title>
+  <style>
+    body {
+      font-family: Poppins, sans-serif;
+      text-align: center;
+      background: linear-gradient(to right, #667eea, #764ba2);
+      color: white;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      color: black;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 500px;
+      margin: auto;
+    }
+
+    .qr-box {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    input {
+      padding: 10px;
+      width: 100%;
+      max-width: 200px;
+      border: 2px solid #667eea;
+      border-radius: 5px;
+      font-size: 16px;
+      margin: 10px 0;
+    }
+
+    button {
+      padding: 10px 20px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #764ba2;
+    }
+
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    img {
+      max-width: 300px;
+      margin: 20px 0;
+    }
+
+    .bus-list {
+      text-align: left;
+      margin: 20px;
+    }
+
+    .bus-item {
+      background: #f0f0f0;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .bus-item:hover {
+      background: #e0e0e0;
+    }
+
+    #scanner-link {
+      display: block;
+      margin-top: 20px;
+      padding: 15px;
+      background: #2ecc71;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+
+    #scanner-link:hover {
+      background: #27ae60;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>🚌 Test QR Code Generator</h1>
+
+    <div class="bus-list">
+      <p>Available Bus IDs:</p>
+      <div class="bus-item" onclick="generateQR('BUS1001')">
+        <strong>BUS1001</strong> - ALUVA → VYTILA
+      </div>
+      <div class="bus-item" onclick="generateQR('BUS1002')">
+        <strong>BUS1002</strong> - ERNAKULAM → POOKATUPADY
+      </div>
+    </div>
+
+    <p>Or enter custom Bus ID:</p>
+    <input
+      type="text"
+      id="busId"
+      placeholder="e.g., BUS1001"
+      value="BUS1001"
+    />
+    <br />
+    <button onclick="generateQR()">Generate QR Code</button>
+
+    <div class="qr-box" id="qrContainer" style="display: none;">
+      <p id="busLabel"></p>
+      <img id="qrImage" />
+      <p style="font-size: 12px; color: #666;">
+        Use the camera to scan this code on another device
+      </p>
+    </div>
+
+    <a id="scanner-link" href="scanner.html" target="_blank">
+      📱 Open Scanner in New Window
+    </a>
+
+    <p style="margin-top: 30px; font-size: 12px; color: #666;">
+      <strong>Instructions:</strong><br />
+      1. Click a bus or enter a custom ID<br />
+      2. Click "Generate QR Code"<br />
+      3. Open the scanner on another device/browser<br />
+      4. Click "Start Scanner" and point at this QR code<br />
+    </p>
+  </div>
+
+  <script>
+    async function generateQR(busId = null) {
+      const inputId = document.getElementById("busId").value.trim();
+      const id = busId || inputId || "BUS1001";
+
+      if (!id) {
+        alert("Please enter a Bus ID");
+        return;
+      }
+
+      const qrContainer = document.getElementById("qrContainer");
+      const qrImage = document.getElementById("qrImage");
+      const busLabel = document.getElementById("busLabel");
+
+      try {
+        qrContainer.style.display = "none";
+
+        // Generate QR using simple approach
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+          id
+        )}`;
+
+        qrImage.src = qrUrl;
+        busLabel.innerHTML = `<strong>Bus ID: ${id}</strong>`;
+
+        // Wait for image to load
+        qrImage.onload = () => {
+          qrContainer.style.display = "block";
+        };
+
+        qrImage.onerror = () => {
+          alert("Failed to generate QR code");
+        };
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    }
+
+    // Generate default QR on load
+    window.addEventListener("load", () => {
+      generateQR("BUS1001");
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bus QR Scanner</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
+
+  <style>
+    body {
+      font-family: Poppins, sans-serif;
+      text-align: center;
+      background: linear-gradient(to right, #667eea, #764ba2);
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+
+    #reader {
+      width: 100%;
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    #qr-reader__scan_label {
+      display: none !important;
+    }
+
+    .status {
+      font-size: 14px;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .result {
+      margin-top: 20px;
+      background: white;
+      color: black;
+      padding: 15px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      background: #ff758c;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>🚌 Bus QR Scanner</h2>
+
+  <div id="reader"></div>
+
+  <button id="scanBtn" onclick="startScanner()">📱 Start Scanner</button>
+  <button id="stopBtn" onclick="stopScanner()" style="display: none; background: #e74c3c;">⛔ Stop Scanner</button>
+
+  <div class="status" id="status">Ready to scan...</div>
+  <div class="result" id="result"></div>
+
+  <script>
+    let html5QrcodeScanner = null;
+    let isScanning = false;
+    let lastScannedCode = null;
+    let userId = null;
+
+    function getServerUrl() {
+      const hostname = window.location.hostname;
+      const protocol = window.location.protocol;
+      return `${protocol}//${hostname}:5000`;
+    }
+
+    function getUserId() {
+      // Generate a consistent ID per device using localStorage
+      if (!userId) {
+        userId = localStorage.getItem("userId");
+        if (!userId) {
+          userId = "USER" + Math.random().toString(36).substr(2, 9).toUpperCase();
+          localStorage.setItem("userId", userId);
+        }
+      }
+      return userId;
+    }
+
+    function updateStatus(message) {
+      document.getElementById("status").innerHTML = message;
+      console.log(message);
+    }
+
+    async function startScanner() {
+      const scanBtn = document.getElementById("scanBtn");
+      const stopBtn = document.getElementById("stopBtn");
+      const resultDiv = document.getElementById("result");
+      
+      if (isScanning) return;
+
+      updateStatus("📷 Requesting camera access...");
+      scanBtn.disabled = true;
+      resultDiv.innerHTML = "";
+
+      try {
+        html5QrcodeScanner = new Html5Qrcode("reader", {
+          formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE]
+        });
+
+        const config = {
+          fps: 30,
+          qrbox: { width: 280, height: 280 },
+          aspectRatio: 1.0,
+          disableFlip: false
+        };
+
+        await html5QrcodeScanner.start(
+          { facingMode: "environment" },
+          config,
+          async (decodedText, decodedResult) => {
+            // Avoid duplicate scans
+            if (lastScannedCode === decodedText) return;
+            lastScannedCode = decodedText;
+
+            updateStatus("✅ QR Code detected: " + decodedText);
+            await stopScanner();
+
+            // Send to backend
+            try {
+              const serverUrl = getServerUrl();
+              const userId = getUserId();
+              
+              updateStatus("📤 Sending to server: " + serverUrl);
+
+              const response = await fetch(`${serverUrl}/scan`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  busId: decodedText.trim(),
+                  userId: userId
+                })
+              });
+
+              if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Server error: ${response.status}`);
+              }
+
+              const data = await response.json();
+              
+              resultDiv.innerHTML = `
+                <div style="background: #2ecc71; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                  <h3>✅ ${data.message}</h3>
+                  <p><strong>Bus ID:</strong> ${decodedText}</p>
+                  <p><strong>User ID:</strong> ${userId}</p>
+                  <p><strong>👥 Total Passengers:</strong> ${data.passengers}</p>
+                </div>
+              `;
+              updateStatus("Success! Scan again or reload.");
+              
+            } catch (error) {
+              console.error("Error:", error);
+              resultDiv.innerHTML = `
+                <div style="background: #e74c3c; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                  <h3>❌ Error</h3>
+                  <p>${error.message}</p>
+                  <p><small>Server: ${getServerUrl()}</small></p>
+                </div>
+              `;
+              updateStatus("❌ " + error.message);
+            }
+          },
+          (errorMessage) => {
+            // Silent error handler for continuous scanning
+          }
+        );
+
+        isScanning = true;
+        stopBtn.style.display = "inline-block";
+        scanBtn.style.display = "none";
+        updateStatus("✅ Camera is ready! Point the QR code at the center...");
+
+      } catch (error) {
+        console.error("Camera initialization error:", error);
+        updateStatus("❌ Camera Error: " + error.message);
+        resultDiv.innerHTML = `
+          <div style="background: #e74c3c; padding: 15px; border-radius: 8px; margin-top: 15px;">
+            <p><strong>Cannot access camera:</strong> ${error.message}</p>
+            <p>Make sure you:</p>
+            <ul style="text-align: left; display: inline-block;">
+              <li>Allowed camera access</li>
+              <li>Use HTTPS or localhost</li>
+              <li>Check browser permissions</li>
+            </ul>
+          </div>
+        `;
+        scanBtn.disabled = false;
+      }
+    }
+
+    async function stopScanner() {
+      const scanBtn = document.getElementById("scanBtn");
+      const stopBtn = document.getElementById("stopBtn");
+      
+      if (html5QrcodeScanner && isScanning) {
+        try {
+          await html5QrcodeScanner.stop();
+          isScanning = false;
+        } catch (error) {
+          console.error("Error stopping scanner:", error);
+        }
+      }
+
+      stopBtn.style.display = "none";
+      scanBtn.style.display = "inline-block";
+      scanBtn.disabled = false;
+      lastScannedCode = null;
+    }
+
+    // Show current User ID on page load
+    window.addEventListener("load", () => {
+      const userId = getUserId();
+      console.log("Device User ID:", userId);
+    });
+  </script>
+
+</body>
+</html>

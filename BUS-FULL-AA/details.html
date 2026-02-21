@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Bus Details</title>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+
+<header>
+  <h1>🚌 BUS FULL-AA</h1>
+</header>
+
+<main class="container">
+  <div class="card">
+    <h2>Available Buses</h2>
+    <div id="busList">Loading...</div>
+
+    <br>
+    <button onclick="goBack()">⬅ Back</button>
+  </div>
+</main>
+
+<script type="module" src="/src/details.js"></script>
+
+<script>
+  function goBack() {
+    window.location.href = "/";
+  }
+</script>
+
+</body>
+</html>
