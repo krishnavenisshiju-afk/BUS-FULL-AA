@@ -1,21 +1,8 @@
 {
-  "public": true,
-  "routes": [
+  "rewrites": [
     {
-      "src": "^/src/(.*)",
-      "dest": "/src/$1"
-    },
-    {
-      "src": "^/public/(.*)",
-      "dest": "/public/$1"
-    },
-    {
-      "src": "^/(index|details|scanner|test-qr)\\.html$",
-      "dest": "/$1.html"
-    },
-    {
-      "src": "^/(?!src|public|.*\\.html).*",
-      "dest": "/index.html"
+      "source": "/:path((?!.*\\..*|_next/.*|public/.*).)*",
+      "destination": "/index.html"
     }
   ]
 }
