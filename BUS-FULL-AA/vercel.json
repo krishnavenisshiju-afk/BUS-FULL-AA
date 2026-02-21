@@ -1,8 +1,16 @@
 {
-  "rewrites": [
+  "buildCommand": "echo 'Static site - no build needed'",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "headers": [
     {
-      "source": "/:path((?!.*\\..*|_next/.*|public/.*).)*",
-      "destination": "/index.html"
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
     }
   ]
 }
