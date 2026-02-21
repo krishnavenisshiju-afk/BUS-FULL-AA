@@ -1,7 +1,4 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": ".",
-  "framework": "vanilla",
   "public": true,
   "routes": [
     {
@@ -17,19 +14,8 @@
       "dest": "/$1.html"
     },
     {
-      "src": "^/",
+      "src": "^/(?!src|public|.*\\.html).*",
       "dest": "/index.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600, must-revalidate"
-        }
-      ]
     }
   ]
 }
