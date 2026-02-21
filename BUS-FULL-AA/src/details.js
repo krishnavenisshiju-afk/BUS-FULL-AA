@@ -1,3 +1,9 @@
+// Backend Configuration
+const API_BASE_URL = 
+  window.location.hostname === 'localhost'
+    ? 'http://localhost:5000'
+    : 'https://bus-full-aa-backend.vercel.app'; // Replace with your actual backend Vercel URL
+
 const busList = document.getElementById("busList");
 
 // 📌 Get values from URL
@@ -16,7 +22,7 @@ const FROM = from.trim().toUpperCase();
 const TO = to.trim().toUpperCase();
 
 // 📌 Fetch buses from backend
-fetch(`http://localhost:5000/buses?from=${FROM}&to=${TO}`)
+fetch(`${API_BASE_URL}/buses?from=${FROM}&to=${TO}`)
   .then(res => res.json())
   .then(data => {
 

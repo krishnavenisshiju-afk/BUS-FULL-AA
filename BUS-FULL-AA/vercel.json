@@ -1,0 +1,35 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".",
+  "framework": "vanilla",
+  "public": true,
+  "routes": [
+    {
+      "src": "^/src/(.*)",
+      "dest": "/src/$1"
+    },
+    {
+      "src": "^/public/(.*)",
+      "dest": "/public/$1"
+    },
+    {
+      "src": "^/(index|details|scanner|test-qr)\\.html$",
+      "dest": "/$1.html"
+    },
+    {
+      "src": "^/",
+      "dest": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, must-revalidate"
+        }
+      ]
+    }
+  ]
+}
