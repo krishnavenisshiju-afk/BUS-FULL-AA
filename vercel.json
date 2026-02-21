@@ -1,0 +1,38 @@
+{
+  "builds": [
+    {
+      "src": "backend/server.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "BUS-FULL-AA/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "backend/server.js"
+    },
+    {
+      "src": "/buses(.*)",
+      "dest": "backend/server.js"
+    },
+    {
+      "src": "/bus(.*)",
+      "dest": "backend/server.js"
+    },
+    {
+      "src": "/scan(.*)",
+      "dest": "backend/server.js"
+    },
+    {
+      "src": "/generate-qr(.*)",
+      "dest": "backend/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "BUS-FULL-AA/$1"
+    }
+  ]
+}
